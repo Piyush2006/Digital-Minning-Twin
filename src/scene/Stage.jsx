@@ -8,6 +8,8 @@ import { AssetNode } from '../components/digitalTwin/AssetNode'
 import { EQUIPMENT, CARD_HEIGHT } from '../components/digitalTwin/registry'
 import { TelemetryLines } from '../components/digitalTwin/TwinUI/TelemetryLines'
 import { MaterialFlow } from '../components/digitalTwin/TwinUI/MaterialFlow'
+import { Fleet } from '../components/digitalTwin/Mine/Fleet'
+import { Crew } from '../components/digitalTwin/People/Crew'
 import { ASSETS } from '../data/assets.config'
 
 export function Stage() {
@@ -37,10 +39,12 @@ export function Stage() {
       <ControlRoom />
       <MaterialFlow />
       <TelemetryLines />
+      <Fleet />
+      <Crew />
 
       {ASSETS.map(asset => {
         const Comp = EQUIPMENT[asset.type]
-        if (!Comp) return null
+        if (!Comp || asset.type === 'HaulTruck') return null
         return (
           <AssetNode key={asset.id} asset={asset} cardHeight={CARD_HEIGHT[asset.type] || 6}>
             <Comp asset={asset} />

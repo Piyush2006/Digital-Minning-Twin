@@ -138,7 +138,6 @@ export function HaulTruck({ asset }) {
   const wheels = useRef([]); const body = useRef(); const dust = useRef()
   useFrame((s, dt) => {
     if (run) wheels.current.forEach(w => w && (w.rotation.x += dt * 3))
-    if (body.current) body.current.position.x = run ? Math.sin(s.clock.elapsedTime * 0.6) * 1.2 : 0
     if (dust.current) {
       const p = run ? (s.clock.elapsedTime * 0.5) % 1 : 0
       dust.current.position.set(-4 - p * 2, 0.6 + p, 0); dust.current.scale.setScalar(0.4 + p)

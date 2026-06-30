@@ -74,3 +74,27 @@ export const MEDIUM_COLOR = { ore: '#b07a3c', concentrate: '#34d399', water: '#3
 export const HAUL_ROAD = [
   [-54, 0, -2], [-50, 0, 2], [-44, 0, 5], [-40, 0, 2], [-36, 0, -1], [-32, 0, 0], [-30, 0, 0],
 ]
+
+// Closed haul loop the running trucks circulate (pit ↔ crusher).
+export const HAUL_LOOP = [
+  [-30, 0, 1], [-37, 0, 5], [-45, 0, 7], [-53, 0, 4], [-58, 0, -2],
+  [-53, 0, -7], [-44, 0, -6], [-36, 0, -3], [-31, 0, -1],
+]
+
+// Hi-vis crew. `path` = patrol (walks between 2 points); `pos` = stands & works.
+const V = { o: '#f5821f', g: '#c4d92e', b: '#2f7fd0' }
+const H = { y: '#f2c40d', w: '#e8edf2', b: '#2f7fd0' }
+export const WORKERS = [
+  { path: [[-6, 0, -22], [3, 0, -22]], vest: V.o, hat: H.w },     // control room
+  { pos: [-3, 0, -28], vest: V.g, hat: H.y, rot: 2.6 },           // control room desk
+  { path: [[-12, 0, 4], [-4, 0, 4]], vest: V.o, hat: H.y },       // mill walk
+  { pos: [-6, 0, 3.4], vest: V.g, hat: H.b, rot: -1.2 },          // mill inspect
+  { path: [[11, 0, 3.5], [19, 0, 3.5]], vest: V.o, hat: H.y },    // flotation walkway
+  { pos: [15, 0, 2.4], vest: V.g, hat: H.w, rot: 0.4 },           // flotation
+  { pos: [-33, 0, 3], vest: V.o, hat: H.b, rot: 1.0 },            // crusher
+  { path: [[26, 0, 4.5], [34, 0, 4.5]], vest: V.g, hat: H.y },    // thickener
+  { pos: [44, 0, -4], vest: V.o, hat: H.w, rot: -0.6 },           // filter press
+  { path: [[54, 0, 11], [62, 0, 11]], vest: V.o, hat: H.y },      // rail loadout
+  { pos: [70, 0, 1.5], vest: V.g, hat: H.b, rot: -1.4 },          // ship loader
+  { path: [[-2, 0, 6], [7, 0, 6]], vest: V.o, hat: H.w },         // plant centre
+]

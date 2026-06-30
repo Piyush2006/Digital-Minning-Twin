@@ -4,12 +4,12 @@ import { ASSETS, ASSET_BY_ID } from './assets.config'
 // Staged opening shift — an operating mine: most running, a few idle, 1 maintenance, 1 alarm.
 const STAGE = {
   exploration: 'idle', drill: 'running', blast: 'idle', shovel: 'running',
-  truck1: 'running', truck2: 'alarm', truck3: 'idle', truck4: 'maintenance', truck5: 'idle',
+  truck1: 'running', truck2: 'running', truck3: 'running', truck4: 'maintenance', truck5: 'alarm',
   crusher: 'running', screen: 'running', mill: 'running', cyclone: 'running',
   flotation: 'running', thickener: 'running', filter: 'running', stacker: 'running',
   rail: 'running', shiploader: 'running', ship: 'running', smelter: 'running',
 }
-const HEALTH = { truck2: 58, truck4: 72 }   // alarm / maintenance assets read lower
+const HEALTH = { truck5: 58, truck4: 72 }   // alarm / maintenance assets read lower
 const HIST = 48                              // history ring length (for charts)
 const rnd = (a, b) => a + Math.random() * (b - a)
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
