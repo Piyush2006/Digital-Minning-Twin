@@ -3,7 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import { Box, Cyl, Cone, Sphere, Torus, MAT } from '../Assets/prims'
 import { useTelemetry } from '../../../data/telemetryStore'
 
-const useLive = (id) => useTelemetry(s => s.live[id])
+const useRun = (id) => useTelemetry(s => s.live[id]?.state === 'running')
+const metric = (id, k) => useTelemetry.getState().live[id]?.metrics?.[k]
 const ORE = { color: '#5a4733', metalness: 0.1, roughness: 0.95 }
 const FOAM = { color: '#cfd6dc', metalness: 0, roughness: 0.9 }
 const SLURRY = { color: '#6e5436', metalness: 0.2, roughness: 0.5 }
@@ -23,7 +24,7 @@ function Riser({ position, color = DUST, h = 1.6, r = 0.5, run }) {
 
 // ───────── Primary Crusher ─────────
 export function Crusher({ asset }) {
-  const run = useLive(asset.id).state === 'running'; const mantle = useRef()
+  const run = useRun(asset.id); const mantle = useRef()
   useFrame((_, dt) => { if (run && mantle.current) mantle.current.rotation.y += dt * 1.6 })
   return (
     <group>
@@ -41,7 +42,7 @@ export function Crusher({ asset }) {
 
 // ───────── Vibrating Screen ─────────
 export function Screen({ asset }) {
-  const run = useLive(asset.id).state === 'running'; const deck = useRef(), ex = useRef()
+  const run = useRun(asset.id); const deck = useRef(), ex = useRef()
   useFrame((s, dt) => {
     if (deck.current) deck.current.position.y = 1.75 + (run ? Math.sin(s.clock.elapsedTime * 12) * 0.06 : 0)
     if (run && ex.current) ex.current.rotation.x += dt * 14
@@ -65,9 +66,8 @@ export function Screen({ asset }) {
 
 // ───────── SAG Mill ─────────
 export function SagMill({ asset }) {
-  const live = useLive(asset.id); const run = live.state === 'running'; const drum = useRef()
-  const spd = 0.6 + (live.metrics.load || 34) / 60
-  useFrame((_, dt) => { if (run && drum.current) drum.current.rotation.y += dt * spd })
+  const run = useRun(asset.id); const drum = useRef()
+  useFrame((_, dt) => { if (run && drum.current) drum.current.rotation.y += dt * (0.6 + (metric(asset.id, 'load') || 34) / 60) })
   return (
     <group>
       <Box args={[1.6, 2.4, 4]} m={MAT.concrete} position={[-4.5, 1.8, 0]} />
@@ -90,7 +90,7 @@ export function SagMill({ asset }) {
 
 // ───────── Hydrocyclone Cluster ─────────
 export function Hydrocyclone({ asset }) {
-  const run = useLive(asset.id).state === 'running'; const dist = useRef()
+  const run = useRun(asset.id); const dist = useRef()
   useFrame((_, dt) => { if (run && dist.current) dist.current.rotation.y += dt * 0.8 })
   const ring = [[0.9, 0], [0.45, 0.78], [-0.45, 0.78], [-0.9, 0], [-0.45, -0.78], [0.45, -0.78]]
   return (
@@ -108,7 +108,7 @@ export function Hydrocyclone({ asset }) {
 
 // ───────── Flotation Bank ─────────
 export function Flotation({ asset }) {
-  const run = useLive(asset.id).state === 'running'; const shafts = useRef([])
+  const run = useRun(asset.id); const shafts = useRef([])
   useFrame((_, dt) => { if (run) shafts.current.forEach(s => s && (s.rotation.y += dt * 3)) })
   const x = [-6, -3, 0, 3, 6]
   return (
@@ -131,7 +131,7 @@ export function Flotation({ asset }) {
 
 // ───────── Thickener ─────────
 export function Thickener({ asset }) {
-  const run = useLive(asset.id).state === 'running'; const rake = useRef()
+  const run = useRun(asset.id); const rake = useRef()
   useFrame((_, dt) => { if (run && rake.current) rake.current.rotation.y += dt * 0.4 })
   return (
     <group>
@@ -152,7 +152,7 @@ export function Thickener({ asset }) {
 
 // ───────── Filter Press ─────────
 export function FilterPress({ asset }) {
-  const run = useLive(asset.id).state === 'running'; const plates = useRef([]); const pump = useRef()
+  const run = useRun(asset.id); const plates = useRef([]); const pump = useRef()
   useFrame((s, dt) => {
     const sp = run ? (Math.sin(s.clock.elapsedTime * 0.6) * 0.5 + 0.5) : 1   // pack open/close cycle
     plates.current.forEach((p, i) => p && (p.position.x = -1.5 + i * 0.6 * (0.7 + sp * 0.6)))
@@ -174,9 +174,9 @@ export function FilterPress({ asset }) {
 
 // ───────── Radial Stacker + Stockpile ─────────
 export function RadialStacker({ asset }) {
-  const live = useLive(asset.id); const run = live.state === 'running'; const rig = useRef()
+  const run = useRun(asset.id); const rig = useRef()
   useFrame((s) => { if (rig.current) rig.current.rotation.y = (run ? Math.sin(s.clock.elapsedTime * 0.25) * 0.5 : 0.3) })
-  const pileH = 2.4 + (live.metrics.stockpile || 13000) / 9000
+  const pileH = 2.4 + useTelemetry(s => Math.round((s.live[asset.id]?.metrics.stockpile || 13000) / 1000)) / 9
   return (
     <group>
       <Box args={[5, 0.4, 5]} m={MAT.concrete} position={[0, 0.2, 0]} />

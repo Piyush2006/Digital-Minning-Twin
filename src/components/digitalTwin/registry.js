@@ -1,12 +1,15 @@
+import { memo } from 'react'
 import { Exploration, DrillRig, BlastBench, Shovel, HaulTruck } from './Mine/Mine'
 import { Crusher, Screen, SagMill, Hydrocyclone, Flotation, Thickener, FilterPress, RadialStacker } from './Processing/Processing'
 import { RailLoadout, ShipLoader, BulkCarrier, Smelter } from './Logistics/Logistics'
 
-export const EQUIPMENT = {
+// Memoized so hovering/zooming an asset (AssetNode re-render) never re-runs its geometry.
+const raw = {
   Exploration, DrillRig, BlastBench, Shovel, HaulTruck,
   Crusher, Screen, SagMill, Hydrocyclone, Flotation, Thickener, FilterPress, RadialStacker,
   RailLoadout, ShipLoader, BulkCarrier, Smelter,
 }
+export const EQUIPMENT = Object.fromEntries(Object.entries(raw).map(([k, C]) => [k, memo(C)]))
 
 // Approx card anchor height per type (metres above origin)
 export const CARD_HEIGHT = {

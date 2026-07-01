@@ -3,14 +3,17 @@ import { useFrame } from '@react-three/fiber'
 import { Box, Cyl, Cone, Sphere, Torus, MAT } from '../Assets/prims'
 import { useTelemetry } from '../../../data/telemetryStore'
 
-const useLive = (id) => useTelemetry(s => s.live[id])
+// Subscribe only to run-state (primitive) → no re-render on every telemetry tick.
+// Metrics that drive animation are read live inside useFrame via getState().
+const useRun = (id) => useTelemetry(s => s.live[id]?.state === 'running')
+const metric = (id, k) => useTelemetry.getState().live[id]?.metrics?.[k]
 const ORE = { color: '#5a4733', metalness: 0.1, roughness: 0.95 }
 const ORE2 = { color: '#6e5536', metalness: 0.1, roughness: 0.95 }
 const DUST = { color: '#cbb893', metalness: 0, roughness: 1 }
 
 // ───────────────────────── Exploration Rig ─────────────────────────
 export function Exploration({ asset }) {
-  const live = useLive(asset.id); const run = live.state === 'running'
+  const run = useRun(asset.id)
   const rod = useRef()
   useFrame((_, dt) => { if (run && rod.current) rod.current.rotation.y += dt * 3 })
   return (
@@ -28,10 +31,10 @@ export function Exploration({ asset }) {
 
 // ───────────────────────── Blasthole Drill ─────────────────────────
 export function DrillRig({ asset }) {
-  const live = useLive(asset.id); const run = live.state === 'running'
+  const run = useRun(asset.id)
   const head = useRef(), pipe = useRef(), dust = useRef()
-  const spd = (live.metrics.rotaryRpm || 95) / 95
   useFrame((s, dt) => {
+    const spd = (metric(asset.id, 'rotaryRpm') || 95) / 95
     if (pipe.current && run) pipe.current.rotation.y += dt * 4 * spd
     if (head.current) head.current.position.y = 5.6 + (run ? Math.sin(s.clock.elapsedTime * 1.4) * 0.35 : 0)
     if (dust.current) {
@@ -94,7 +97,7 @@ export function BlastBench({ asset }) {
 
 // ───────────────────────── Hydraulic Shovel ─────────────────────────
 export function Shovel({ asset }) {
-  const live = useLive(asset.id); const run = live.state === 'running'
+  const run = useRun(asset.id)
   const house = useRef(), boom = useRef(), stick = useRef(), spill = useRef()
   useFrame((s) => {
     const t = s.clock.elapsedTime
@@ -133,8 +136,8 @@ export function Shovel({ asset }) {
 
 // ───────────────────────── Haul Truck ─────────────────────────
 export function HaulTruck({ asset }) {
-  const live = useLive(asset.id); const run = live.state === 'running'
-  const loaded = (live.metrics.payload || 0) > 50
+  const run = useRun(asset.id)
+  const loaded = useTelemetry(s => (s.live[asset.id]?.metrics.payload || 0) > 50)
   const wheels = useRef([]); const body = useRef(); const dust = useRef()
   useFrame((s, dt) => {
     if (run) wheels.current.forEach(w => w && (w.rotation.x += dt * 3))

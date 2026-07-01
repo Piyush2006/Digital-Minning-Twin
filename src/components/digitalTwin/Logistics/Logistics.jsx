@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Box, Cyl, Cone, Sphere, MAT } from '../Assets/prims'
 import { useTelemetry } from '../../../data/telemetryStore'
 
-const useLive = (id) => useTelemetry(s => s.live[id])
+const useRun = (id) => useTelemetry(s => s.live[id]?.state === 'running')
 const ORE = { color: '#5a4733', metalness: 0.1, roughness: 0.95 }
 const SMOKE = { color: '#c4ccd4', metalness: 0, roughness: 1 }
 
@@ -21,7 +21,7 @@ function Smoke({ position, run, h = 3, r = 0.9 }) {
 
 // ───────── Rail Loadout + Train ─────────
 export function RailLoadout({ asset }) {
-  const run = useLive(asset.id).state === 'running'; const roll = useRef()
+  const run = useRun(asset.id); const roll = useRef()
   useFrame((_, dt) => { if (run && roll.current) roll.current.rotation.x += dt * 5 })
   return (
     <group>
@@ -47,7 +47,7 @@ export function RailLoadout({ asset }) {
 
 // ───────── Ship Loader ─────────
 export function ShipLoader({ asset }) {
-  const live = useLive(asset.id); const run = live.state === 'running'; const roll = useRef(), stream = useRef()
+  const run = useRun(asset.id);const roll = useRef(), stream = useRef()
   useFrame((s, dt) => {
     if (run && roll.current) roll.current.rotation.x += dt * 5
     if (stream.current) { const p = run ? (s.clock.elapsedTime * 1.1) % 1 : 0; stream.current.position.y = 5 - p * 4.5; stream.current.visible = run && p < 0.85 }
@@ -71,7 +71,7 @@ export function ShipLoader({ asset }) {
 
 // ───────── Bulk Carrier ─────────
 export function BulkCarrier({ asset }) {
-  const live = useLive(asset.id); const run = live.state === 'running'; const hull = useRef(), crane = useRef()
+  const run = useRun(asset.id);const hull = useRef(), crane = useRef()
   useFrame((s, dt) => {
     if (hull.current) { hull.current.position.y = Math.sin(s.clock.elapsedTime * 0.5) * 0.12; hull.current.rotation.z = Math.sin(s.clock.elapsedTime * 0.4) * 0.01 }
     if (run && crane.current) crane.current.rotation.y += dt * 0.3
@@ -94,7 +94,7 @@ export function BulkCarrier({ asset }) {
 
 // ───────── Smelter ─────────
 export function Smelter({ asset }) {
-  const run = useLive(asset.id).state === 'running'; const conv = useRef()
+  const run = useRun(asset.id); const conv = useRef()
   useFrame((_, dt) => { if (run && conv.current) conv.current.rotation.y += dt * 0.8 })
   return (
     <group>

@@ -15,12 +15,14 @@ const TRUCKS = ASSETS.filter(a => a.type === 'HaulTruck')
 function MovingTruck({ asset, curve, offset }) {
   const grp = useRef()
   const t = useRef(offset)
-  const live = useTelemetry(s => s.live[asset.id])
+  const state = useTelemetry(s => s.live[asset.id]?.state)
   const setHovered = useTelemetry(s => s.setHovered)
   const setSelected = useTelemetry(s => s.setSelected)
   const hovered = useTelemetry(s => s.hovered === asset.id)
   const selected = useTelemetry(s => s.selected === asset.id)
-  const moving = live.state === 'running'
+  const moving = state === 'running'
+  const showCard = hovered || selected
+  const SC = { running: '#34d399', idle: '#fbbf24', maintenance: '#38bdf8', alarm: '#f43f5e' }
 
   useFrame((_, dt) => {
     if (!grp.current) return
@@ -41,15 +43,20 @@ function MovingTruck({ asset, curve, offset }) {
       onPointerOut={(e) => { e.stopPropagation(); setHovered(null) }}
       onClick={(e) => { e.stopPropagation(); setSelected(asset.id) }}>
       <HaulTruck asset={asset} />
-      {(hovered || selected) && (
+      {showCard && (
         <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[3.2, 3.7, 40]} />
           <meshBasicMaterial color={selected ? '#38bdf8' : '#e6edf6'} transparent opacity={0.85} toneMapped={false} />
         </mesh>
       )}
-      <Html position={[0, 5.5, 0]} center distanceFactor={34} zIndexRange={[30, 0]} pointerEvents="none" wrapperClass="dt-card">
-        <HmiCard asset={asset} expanded={hovered || selected} />
-      </Html>
+      {!showCard && (
+        <mesh position={[0, 5, 0]}><sphereGeometry args={[0.42, 14, 14]} /><meshBasicMaterial color={SC[state] || '#e7b53c'} toneMapped={false} /></mesh>
+      )}
+      {showCard && (
+        <Html position={[0, 5.5, 0]} center distanceFactor={30} zIndexRange={[30, 0]} pointerEvents="none" wrapperClass="dt-card">
+          <HmiCard asset={asset} expanded />
+        </Html>
+      )}
     </group>
   )
 }

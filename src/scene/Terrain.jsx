@@ -43,15 +43,15 @@ const Pad = ({ pos, size }) => (
 export function Terrain() {
   return (
     <group>
-      {/* shadow-catching ground + premium tech grid */}
+      {/* shadow-catching ground + subtle dark-blueprint grid */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
-        <planeGeometry args={[420, 220]} /><meshStandardMaterial color="#0c1119" roughness={1} metalness={0} />
+        <planeGeometry args={[420, 220]} /><meshStandardMaterial color="#080d15" roughness={1} metalness={0} />
       </mesh>
       <Grid
         position={[0, 0, 0]} args={[420, 220]} infiniteGrid
-        cellSize={2} cellThickness={0.6} cellColor="#1d2632"
-        sectionSize={10} sectionThickness={1.1} sectionColor="#2f4661"
-        fadeDistance={240} fadeStrength={1.5} followCamera={false}
+        cellSize={2.5} cellThickness={0.45} cellColor="#0f1a2a"
+        sectionSize={12.5} sectionThickness={0.9} sectionColor="#16324d"
+        fadeDistance={150} fadeStrength={2.2} followCamera={false}
       />
       <Pit />
       <Road />

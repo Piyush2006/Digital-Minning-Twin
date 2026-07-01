@@ -18,11 +18,11 @@ export function Stage() {
     <Canvas
       shadows="soft"
       dpr={[1, 1.6]}
-      camera={{ position: [-36, 40, 78], fov: 42, near: 0.5, far: 600 }}
+      camera={{ position: [-20, 28, 56], fov: 40, near: 0.5, far: 420 }}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
     >
-      <color attach="background" args={['#070b12']} />
-      <fog attach="fog" args={['#070b12', 120, 360]} />
+      <color attach="background" args={['#060a11']} />
+      <fog attach="fog" args={['#060a11', 90, 250]} />
 
       <ambientLight intensity={0.55} color="#cfe0f2" />
       <directionalLight position={[40, 60, 30]} intensity={2.4} color="#fff3e6" castShadow
@@ -55,8 +55,8 @@ export function Stage() {
       })}
 
       <OrbitControls
-        target={[6, 2, 0]} makeDefault
-        minDistance={12} maxDistance={260} maxPolarAngle={Math.PI / 2.08}
+        target={[10, 3, 0]} makeDefault
+        minDistance={10} maxDistance={220} maxPolarAngle={Math.PI / 2.08}
         enableDamping dampingFactor={0.1} rotateSpeed={0.9} zoomSpeed={1.3} panSpeed={1.1} zoomToCursor />
 
       <AdaptiveDpr pixelated />
