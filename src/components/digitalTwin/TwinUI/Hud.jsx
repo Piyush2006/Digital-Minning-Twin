@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { FiTrendingUp, FiActivity, FiZap, FiAlertTriangle, FiWind, FiThermometer, FiDroplet, FiCloud, FiTruck, FiRadio } from 'react-icons/fi'
 import { useTelemetry } from '../../../data/telemetryStore'
+import { useAI } from '../../../data/aiStore'
 import { MEDIUM_COLOR } from '../../../data/assets.config'
 
 const Stat = ({ icon, label, value, unit, accent = '#e6edf6' }) => (
@@ -17,6 +18,8 @@ export function Hud() {
   const plant = useTelemetry(s => s.plant)
   const weather = useTelemetry(s => s.weather)
   const fleet = useTelemetry(s => s.fleet)
+  const env = useAI(s => s.env)
+  const aqColor = env.airQuality === 'Good' ? '#34d399' : env.airQuality === 'Moderate' ? '#fbbf24' : '#f43f5e'
 
   return (
     <>
@@ -68,6 +71,17 @@ export function Hud() {
             </div>
           ))}
         </div>
+        {/* AI · Air Quality + dust recommendation */}
+        <div className="mt-2 flex items-center justify-between rounded-lg bg-white/[0.04] px-2 py-1.5">
+          <span className="text-[10px] text-white/50">Air Quality</span>
+          <span className="text-[11px] font-bold" style={{ color: aqColor }}>{env.airQuality}</span>
+        </div>
+        {env.rec && (
+          <div className="mt-1.5 flex items-start gap-1.5 rounded-lg px-2 py-1.5" style={{ background: 'rgba(56,189,248,0.10)', border: '1px solid rgba(56,189,248,0.25)' }}>
+            <span className="text-info text-[11px] mt-[1px]">⤷</span>
+            <span className="text-[10px] text-info font-semibold leading-snug">AI: {env.rec}</span>
+          </div>
+        )}
       </motion.div>
 
       {/* Flow legend — top right */}

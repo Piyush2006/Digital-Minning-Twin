@@ -10,6 +10,7 @@ import { TelemetryLines } from '../components/digitalTwin/TwinUI/TelemetryLines'
 import { MaterialFlow } from '../components/digitalTwin/TwinUI/MaterialFlow'
 import { Fleet } from '../components/digitalTwin/Mine/Fleet'
 import { Crew } from '../components/digitalTwin/People/Crew'
+import { ConveyorAI } from '../components/digitalTwin/TwinUI/ConveyorAI'
 import { ASSETS } from '../data/assets.config'
 
 export function Stage() {
@@ -41,6 +42,7 @@ export function Stage() {
       <TelemetryLines />
       <Fleet />
       <Crew />
+      <ConveyorAI />
 
       {ASSETS.map(asset => {
         const Comp = EQUIPMENT[asset.type]

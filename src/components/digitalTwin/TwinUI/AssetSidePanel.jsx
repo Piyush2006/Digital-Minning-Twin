@@ -3,8 +3,10 @@ import { FiX, FiActivity, FiTool, FiClock } from 'react-icons/fi'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import { useTelemetry } from '../../../data/telemetryStore'
+import { useAI } from '../../../data/aiStore'
 import { ASSET_BY_ID } from '../../../data/assets.config'
 import { STATUS } from './HmiCard'
+import { FiCpu, FiTruck } from 'react-icons/fi'
 
 const chartOpts = (name, unit, data, color) => ({
   chart: { type: 'areaspline', backgroundColor: 'transparent', height: 150, margin: [10, 6, 22, 36] },
@@ -21,6 +23,8 @@ export function AssetSidePanel() {
   const selected = useTelemetry(s => s.selected)
   const setSelected = useTelemetry(s => s.setSelected)
   const live = useTelemetry(s => (selected ? s.live[selected] : null))
+  const maint = useAI(s => (selected ? s.maint[selected] : null))
+  const fleetAI = useAI(s => (selected ? s.fleet[selected] : null))
   const asset = selected ? ASSET_BY_ID[selected] : null
 
   return (
@@ -68,6 +72,46 @@ export function AssetSidePanel() {
                 </div>
               ))}
             </div>
+
+            {/* AI — Predictive Maintenance */}
+            {maint && (
+              <div className="mt-4 rounded-xl p-3 border border-info/25" style={{ background: 'linear-gradient(180deg, rgba(56,189,248,0.08), rgba(56,189,248,0.02))' }}>
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-info mb-2"><FiCpu size={13} /> AI · Predictive Maintenance</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-lg bg-white/[0.04] px-2.5 py-2">
+                    <div className="text-[9px] uppercase text-white/40">Remaining Useful Life</div>
+                    <div className="text-[15px] font-bold text-white font-mono">{maint.rul}<span className="text-[9px] text-white/40 ml-0.5 font-sans">h</span></div>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.04] px-2.5 py-2">
+                    <div className="text-[9px] uppercase text-white/40">Failure Probability</div>
+                    <div className="text-[15px] font-bold font-mono" style={{ color: maint.fp > 70 ? '#f43f5e' : maint.fp > 45 ? '#fbbf24' : '#34d399' }}>{maint.fp}<span className="text-[9px] text-white/40 ml-0.5 font-sans">%</span></div>
+                  </div>
+                </div>
+                <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${maint.fp}%`, background: maint.fp > 70 ? '#f43f5e' : maint.fp > 45 ? '#fbbf24' : '#34d399' }} />
+                </div>
+                <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-white/[0.04] px-2 py-1.5">
+                  <span className="text-info text-[11px] mt-[1px]">⤷</span>
+                  <span className="text-[10.5px] text-white/80 leading-snug"><span className="font-semibold text-white">Recommendation:</span> {maint.rec}</span>
+                </div>
+              </div>
+            )}
+
+            {/* AI — Fleet Optimization (trucks) */}
+            {fleetAI && (
+              <div className="mt-3 rounded-xl p-3 border border-warn/25" style={{ background: 'linear-gradient(180deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02))' }}>
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-warn mb-2"><FiTruck size={13} /> AI · Fleet Optimization</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-lg bg-white/[0.04] px-2.5 py-2"><div className="text-[9px] uppercase text-white/40">Cycle Time</div><div className="text-[15px] font-bold text-white font-mono">{fleetAI.cycleTime}<span className="text-[9px] text-white/40 ml-0.5 font-sans">min</span></div></div>
+                  <div className="rounded-lg bg-white/[0.04] px-2.5 py-2"><div className="text-[9px] uppercase text-white/40">Queue</div><div className="text-[15px] font-bold text-white font-mono">{fleetAI.queue}</div></div>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-[11px]"><span className="text-white/45">Current Route</span><span className="font-semibold" style={{ color: fleetAI.alt ? '#fbbf24' : '#e6edf6' }}>{fleetAI.route}{fleetAI.alt ? ' → alt. road' : ''}</span></div>
+                <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-white/[0.04] px-2 py-1.5">
+                  <span className="text-warn text-[11px] mt-[1px]">⤷</span>
+                  <span className="text-[10.5px] text-white/80 leading-snug"><span className="font-semibold text-white">Recommendation:</span> {fleetAI.rec}</span>
+                </div>
+              </div>
+            )}
 
             {/* sensors / maintenance */}
             <div className="mt-4 rounded-xl bg-white/[0.04] p-3">
