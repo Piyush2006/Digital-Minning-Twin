@@ -93,8 +93,6 @@ export const HAUL_LOOP = [
 const V = { o: '#f5821f', g: '#c4d92e', b: '#2f7fd0' }
 const H = { y: '#f2c40d', w: '#e8edf2', b: '#2f7fd0' }
 export const WORKERS = [
-  { id: 'w1', name: 'R. Mehta',  zone: 'Control Room',    track: true, badgeY: 2.2, path: [[-6, 0, -22], [3, 0, -22]], vest: V.o, hat: H.w },
-  { id: 'w2', name: 'S. Iyer',   zone: 'Control Room',    track: true, badgeY: 2.2, pos: [-3, 0, -28], vest: V.g, hat: H.y, rot: 2.6 },
   { path: [[-12, 0, 4], [-4, 0, 4]], vest: V.o, hat: H.y },                                          // mill walk
   { id: 'w3', name: 'A. Khan',   zone: 'Processing Plant', track: true, badgeY: 2.2, pos: [-6, 0, 3.4], vest: V.g, hat: H.b, rot: -1.2 },
   { path: [[11, 0, 3.5], [19, 0, 3.5]], vest: V.o, hat: H.y },                                       // flotation walkway
