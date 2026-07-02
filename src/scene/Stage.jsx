@@ -3,10 +3,8 @@ import { Canvas } from '@react-three/fiber'
 import { Environment, OrbitControls, ContactShadows, AdaptiveDpr, BakeShadows } from '@react-three/drei'
 import { PostFX } from './PostFX'
 import { Terrain } from './Terrain'
-import { ControlRoom } from './ControlRoom'
 import { AssetNode } from '../components/digitalTwin/AssetNode'
 import { EQUIPMENT, CARD_HEIGHT } from '../components/digitalTwin/registry'
-import { TelemetryLines } from '../components/digitalTwin/TwinUI/TelemetryLines'
 import { MaterialFlow } from '../components/digitalTwin/TwinUI/MaterialFlow'
 import { Fleet } from '../components/digitalTwin/Mine/Fleet'
 import { Crew } from '../components/digitalTwin/People/Crew'
@@ -40,11 +38,9 @@ export function Stage() {
       <Terrain />
       <ContactShadows position={[0, 0.04, 0]} opacity={0.45} scale={260} blur={2.4} far={40} resolution={1024} color="#000000" />
 
-      <ControlRoom />
       <Conveyors />
       <AICameras />
       <MaterialFlow />
-      <TelemetryLines />
       <Fleet />
       <Crew />
       <ConveyorAI />

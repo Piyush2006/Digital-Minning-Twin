@@ -35,7 +35,7 @@ export function Hud() {
         className="absolute top-3.5 left-4 z-20 flex items-center gap-2 pointer-events-none">
         <div className="grid place-items-center w-8 h-8 rounded-lg glass-strong text-info"><FiRadio size={16} /></div>
         <div>
-          <div className="text-[12.5px] font-extrabold text-white tracking-tight leading-none">COPPER MINE · Digital Twin</div>
+          <div className="text-[12.5px] font-extrabold text-white tracking-tight leading-none">Mining Digital Twin</div>
           <div className="text-[9px] text-info font-semibold mt-0.5">● LIVE · simulated telemetry</div>
         </div>
       </motion.div>

@@ -39,7 +39,7 @@ export function RightWidget() {
             )}
             {tab === 'flow' && (
               <div className="flex flex-col gap-1.5 py-0.5">
-                {[['Ore', MEDIUM_COLOR.ore], ['Concentrate', MEDIUM_COLOR.concentrate], ['Water', MEDIUM_COLOR.water], ['Tailings', MEDIUM_COLOR.tailings], ['Telemetry', '#38bdf8']].map(([k, c]) => (
+                {[['Ore', MEDIUM_COLOR.ore], ['Concentrate', MEDIUM_COLOR.concentrate], ['Water', MEDIUM_COLOR.water], ['Tailings', MEDIUM_COLOR.tailings]].map(([k, c]) => (
                   <div key={k} className="flex items-center gap-2 text-[11px] text-white/75"><span className="w-4 h-1 rounded-full" style={{ background: c }} />{k}</div>
                 ))}
               </div>
