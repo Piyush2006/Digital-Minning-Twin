@@ -70,6 +70,14 @@ export const FLOW = [
 ]
 export const MEDIUM_COLOR = { ore: '#b07a3c', concentrate: '#34d399', water: '#38bdf8', tailings: '#f43f5e' }
 
+// Monitored conveyors + their AI-vision cameras (geometry derived from asset coords).
+export const CONVEYORS = [
+  { id: 'cv01', name: 'CV-01', title: 'Crusher Feed Conveyor', from: 'crusher', to: 'screen',  camId: 'CAM-01', camName: 'Crusher Feed Cam',    monitors: 'Primary Crusher Feed' },
+  { id: 'cv02', name: 'CV-02', title: 'Mill Feed Conveyor',    from: 'screen',  to: 'mill',    camId: 'CAM-02', camName: 'Screen Discharge Cam', monitors: 'SAG Mill Feed' },
+  { id: 'cv03', name: 'CV-03', title: 'Concentrate Conveyor',  from: 'filter',  to: 'stacker', camId: 'CAM-03', camName: 'Filter Discharge Cam', monitors: 'Concentrate Transfer' },
+  { id: 'cv04', name: 'CV-04', title: 'Stockpile Conveyor',    from: 'stacker', to: 'rail',    camId: 'CAM-04', camName: 'Stockpile Cam',        monitors: 'Stockpile Reclaim' },
+]
+
 // Haul-road centreline (trucks animate along this), pit → crusher
 export const HAUL_ROAD = [
   [-54, 0, -2], [-50, 0, 2], [-44, 0, 5], [-40, 0, 2], [-36, 0, -1], [-32, 0, 0], [-30, 0, 0],

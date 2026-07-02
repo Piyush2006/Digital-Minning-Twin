@@ -4,6 +4,7 @@ import { Hud } from './components/digitalTwin/TwinUI/Hud'
 import { RightWidget } from './components/digitalTwin/TwinUI/RightWidget'
 import { Dock } from './components/digitalTwin/TwinUI/Dock'
 import { AssetSidePanel } from './components/digitalTwin/TwinUI/AssetSidePanel'
+import { CameraEvidencePanel } from './components/digitalTwin/TwinUI/CameraEvidencePanel'
 import { AIOpsCenter } from './components/digitalTwin/TwinUI/AIOpsCenter'
 import { ControlRoomModal } from './components/digitalTwin/TwinUI/ControlRoomModal'
 import { useTelemetry } from './data/telemetryStore'
@@ -36,6 +37,7 @@ export function MiningDigitalTwin() {
       <AIOpsCenter />
       <RightWidget />
       <AssetSidePanel />
+      <CameraEvidencePanel />
       <ControlRoomModal />
       <Dock />
       <div className="pointer-events-none absolute inset-0 z-10" style={{ boxShadow: 'inset 0 0 200px rgba(0,0,0,0.6)' }} />

@@ -11,6 +11,9 @@ import { MaterialFlow } from '../components/digitalTwin/TwinUI/MaterialFlow'
 import { Fleet } from '../components/digitalTwin/Mine/Fleet'
 import { Crew } from '../components/digitalTwin/People/Crew'
 import { ConveyorAI } from '../components/digitalTwin/TwinUI/ConveyorAI'
+import { Conveyors } from '../components/digitalTwin/Conveyors/Conveyors'
+import { AICameras } from '../components/digitalTwin/Conveyors/AICameras'
+import { CameraFocus } from '../components/digitalTwin/Conveyors/CameraFocus'
 import { ASSETS } from '../data/assets.config'
 
 export function Stage() {
@@ -38,11 +41,14 @@ export function Stage() {
       <ContactShadows position={[0, 0.04, 0]} opacity={0.45} scale={260} blur={2.4} far={40} resolution={1024} color="#000000" />
 
       <ControlRoom />
+      <Conveyors />
+      <AICameras />
       <MaterialFlow />
       <TelemetryLines />
       <Fleet />
       <Crew />
       <ConveyorAI />
+      <CameraFocus />
 
       {ASSETS.map(asset => {
         const Comp = EQUIPMENT[asset.type]

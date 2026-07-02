@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 import { useTelemetry } from './telemetryStore'
-import { ASSET_BY_ID, WORKERS } from './assets.config'
+import { ASSET_BY_ID, WORKERS, CONVEYORS } from './assets.config'
 
-// ── AI layer: derives predictive-maintenance, fleet, environment, conveyor-vision
+// ── AI layer: derives predictive-maintenance, fleet, environment, conveyor AI-vision
 // and worker-safety insight from the live telemetry. Pure simulation, ~4s cadence.
 
 const MAJOR = ['drill', 'shovel', 'crusher', 'mill', 'truck1', 'truck2', 'truck3', 'truck4', 'truck5']
@@ -18,18 +18,48 @@ const REC = {
 }
 const CYC0 = { truck1: 23, truck2: 24, truck3: 26, truck4: 25, truck5: 22 }
 const ROUTE = { truck1: 'Haul Road A', truck2: 'Haul Road A', truck3: 'Haul Road B', truck4: 'Haul Road B', truck5: 'Pit Ramp' }
-const ISSUES = ['Belt misalignment', 'Spillage detected', 'Foreign object', 'Smoke detected']
 const COOLDOWN = 22000
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
 const rnd = (a, b) => a + Math.random() * (b - a)
 const label = (id) => ASSET_BY_ID[id]?.label || id
+
+// ── Conveyor AI-vision detection catalogue ──
+export const DET = {
+  'Belt Misalignment': { sev: 'warning',  conf: [82, 94], actions: ['Reduce belt speed', 'Inspect roller #5', 'Replace idler'] },
+  'Material Spillage':  { sev: 'warning',  conf: [80, 93], actions: ['Clean belt', 'Inspect skirt rubber', 'Check load profile'] },
+  'Foreign Object':     { sev: 'critical', conf: [94, 99], actions: ['Stop conveyor immediately', 'Remove object', 'Restart conveyor'] },
+  'Smoke':              { sev: 'critical', conf: [90, 98], actions: ['Inspect motor', 'Check bearings', 'Activate fire protocol'] },
+  'Belt Damage':        { sev: 'critical', conf: [88, 97], actions: ['Stop conveyor', 'Inspect belt splice', 'Schedule belt repair'] },
+  'Roller Failure':     { sev: 'warning',  conf: [84, 95], actions: ['Inspect roller bearings', 'Replace faulty roller', 'Lubricate idlers'] },
+}
+const DTYPES = Object.keys(DET)
 
 const TRACKED = WORKERS.filter(w => w.track).map(w => ({ id: w.id, name: w.name, zone: w.zone, ppe: true, clearAt: 0 }))
 
 let idc = 3
 const lastEmit = {}
 const now0 = Date.now()
-for (const k of ['crusher-brg', 'cycle-truck3', 'dust']) lastEmit[k] = now0
+for (const k of ['crusher-brg', 'cycle-truck3', 'dust', 'cv-cv02']) lastEmit[k] = now0
+
+const mkDet = (type, ts) => ({
+  id: ++idc, type, sev: DET[type].sev,
+  conf: Math.round(rnd(DET[type].conf[0], DET[type].conf[1])),
+  ts, seed: Math.floor(rnd(1, 9999)), actions: DET[type].actions,
+})
+
+// Seed: CV-02 has a live Foreign-Object detection; others carry recent history.
+const seedConveyors = () => CONVEYORS.map(c => {
+  const b = { ...c, status: 'monitoring', camStatus: 'online', detection: null, clearAt: 0, history: [] }
+  if (c.id === 'cv02') {
+    const d = mkDet('Foreign Object', now0)
+    b.detection = d; b.status = 'detecting'; b.camStatus = 'recording'; b.clearAt = now0 + 90000
+    b.history = [d, mkDet('Material Spillage', now0 - 14 * 60000), mkDet('Belt Misalignment', now0 - 47 * 60000)]
+  } else if (c.id === 'cv01') b.history = [mkDet('Roller Failure', now0 - 22 * 60000)]
+  else if (c.id === 'cv03') b.history = [mkDet('Smoke', now0 - 89 * 60000)]
+  return b
+})
+const CONV_SEED = seedConveyors()
+const cv02conf = CONV_SEED.find(c => c.id === 'cv02').detection.conf
 
 const seedMaint = () => Object.fromEntries(MAJOR.map(id => {
   const fp = FP0[id]; return [id, { fp, rul: Math.round(LIFE[id] * (1 - fp / 100)), rec: REC[id], health: 90 }]
@@ -40,17 +70,15 @@ export const useAI = create((set, get) => ({
   insights: [
     { id: 1, key: 'crusher-brg', sev: 'warning', asset: 'Primary Crusher', msg: 'Bearing temperature trending up — above normal', action: 'Inspect bearing during next maintenance shift.', ts: now0 },
     { id: 2, key: 'cycle-truck3', sev: 'warning', asset: 'Haul Truck C', msg: 'Cycle time increasing (+12%) · queue 6', action: 'Use alternate haul road.', ts: now0 },
-    { id: 3, key: 'dust', sev: 'info', asset: 'Environment', msg: 'Dust PM10 approaching threshold', action: 'Prepare water sprinklers.', ts: now0 },
+    { id: 3, key: 'cv-cv02', sev: 'critical', asset: 'CV-02 · Mill Feed Conveyor', msg: `AI Vision: Foreign Object on CV-02 (${cv02conf}%)`, action: 'Stop conveyor immediately', ts: now0, cv: 'cv02' },
   ],
   maint: seedMaint(),
   fleet: seedFleet(),
   env: { airQuality: 'Moderate', dust: 32, rec: null },
-  conveyors: [
-    { id: 'cv01', name: 'Conveyor CV-01', seg: ['crusher', 'screen'], status: 'ok', issue: null, clearAt: 0 },
-    { id: 'cv02', name: 'Conveyor CV-02', seg: ['screen', 'mill'], status: 'ok', issue: null, clearAt: 0 },
-    { id: 'cv03', name: 'Conveyor CV-03', seg: ['filter', 'stacker'], status: 'ok', issue: null, clearAt: 0 },
-  ],
+  conveyors: CONV_SEED,
   workers: TRACKED,
+
+  ackDetection: (id) => set(s => ({ conveyors: s.conveyors.map(c => c.id === id ? ({ ...c, detection: null, status: 'monitoring', camStatus: 'online' }) : c) })),
 
   tick: () => {
     const now = Date.now()
@@ -58,10 +86,10 @@ export const useAI = create((set, get) => ({
     const live = T.live
     const s = get()
     let insights = s.insights
-    const add = (key, sev, asset, msg, action) => {
+    const add = (key, sev, asset, msg, action, cv) => {
       if (now - (lastEmit[key] || 0) < COOLDOWN) return
       lastEmit[key] = now
-      insights = [{ id: ++idc, key, sev, asset, msg, action, ts: now }, ...insights].slice(0, 16)
+      insights = [{ id: ++idc, key, sev, asset, msg, action, ts: now, cv }, ...insights].slice(0, 16)
     }
 
     // predictive maintenance
@@ -73,7 +101,6 @@ export const useAI = create((set, get) => ({
       maint[id] = { fp: Math.round(fp), rul, rec: REC[id], health: Math.round(live[id]?.health ?? 90) }
       if (fp > 70) add('fp-' + id, fp > 80 ? 'critical' : 'warning', label(id), `${label(id)} failure probability ${Math.round(fp)}% · RUL ~${rul} h`, REC[id])
     }
-    // telemetry-driven
     const cr = live.crusher?.metrics
     if (cr && cr.bearingTemp > 72) add('crusher-brg', cr.bearingTemp > 90 ? 'critical' : 'warning', 'Primary Crusher', `Bearing temperature ${cr.bearingTemp.toFixed(0)}°C — above normal`, 'Inspect bearing during next maintenance shift.')
     const ml = live.mill?.metrics
@@ -99,15 +126,21 @@ export const useAI = create((set, get) => ({
     const env = { airQuality: aq, dust: Math.round(dust), rec: dust > 58 ? 'Activate water sprinklers on haul roads.' : null }
     if (dust > 58) add('dust', 'warning', 'Environment', `Dust PM10 ${dust.toFixed(0)} µg/m³ — expected to exceed threshold in ~20 min`, 'Activate water sprinklers.')
 
-    // conveyor AI vision
+    // conveyor AI vision — detections, camera status, history
     const conveyors = s.conveyors.map(c => ({ ...c }))
-    for (const c of conveyors) if (c.status === 'flagged' && now > c.clearAt) { c.status = 'ok'; c.issue = null }
-    if (Math.random() < 0.13) {
-      const oks = conveyors.filter(c => c.status === 'ok')
-      if (oks.length) {
-        const c = oks[Math.floor(Math.random() * oks.length)]
-        c.status = 'flagged'; c.issue = ISSUES[Math.floor(Math.random() * ISSUES.length)]; c.clearAt = now + rnd(12000, 20000)
-        add('cv-' + c.id, c.issue === 'Smoke detected' ? 'critical' : 'warning', c.name, `AI Vision: ${c.issue} on ${c.name}`, 'Inspection recommended.')
+    for (const c of conveyors) {
+      if (c.detection && now > c.clearAt) { c.detection = null; c.status = 'monitoring'; c.camStatus = 'online' }
+      else if (!c.detection) c.camStatus = Math.random() < 0.12 ? 'processing' : 'online'
+    }
+    if (Math.random() < 0.16) {
+      const clean = conveyors.filter(c => !c.detection)
+      if (clean.length) {
+        const c = clean[Math.floor(Math.random() * clean.length)]
+        const type = DTYPES[Math.floor(Math.random() * DTYPES.length)]
+        const d = mkDet(type, now)
+        c.detection = d; c.status = 'detecting'; c.camStatus = 'recording'; c.clearAt = now + rnd(16000, 28000)
+        c.history = [d, ...c.history].slice(0, 14)
+        add('cv-' + c.id, d.sev, `${c.name} · ${c.title}`, `AI Vision: ${type} on ${c.name} (${d.conf}%)`, d.actions[0], c.id)
       }
     }
 

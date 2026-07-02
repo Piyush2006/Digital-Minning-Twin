@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FiCpu, FiAlertOctagon, FiAlertTriangle, FiInfo, FiChevronLeft } from 'react-icons/fi'
 import { useAI } from '../../../data/aiStore'
 import { useUI } from '../../../data/uiStore'
+import { useTelemetry } from '../../../data/telemetryStore'
 
 const SEV = {
   critical: { c: '#f43f5e', icon: <FiAlertOctagon size={12} />, label: 'CRITICAL' },
@@ -14,6 +15,8 @@ export function AIOpsCenter() {
   const insights = useAI(s => s.insights)
   const open = useUI(s => s.aiOpen)
   const toggle = useUI(s => s.toggleAi)
+  const setEvidence = useUI(s => s.setEvidence)
+  const setSelected = useTelemetry(s => s.setSelected)
   const crit = insights.filter(i => i.sev === 'critical').length
 
   return (
@@ -36,7 +39,8 @@ export function AIOpsCenter() {
                   const s = SEV[it.sev]
                   return (
                     <motion.div key={it.id} layout initial={{ opacity: 0, x: -12, height: 0 }} animate={{ opacity: 1, x: 0, height: 'auto' }} exit={{ opacity: 0, x: 12, height: 0 }} transition={{ duration: 0.3 }}
-                      className="rounded-lg bg-white/[0.04] p-2 border-l-2" style={{ borderColor: s.c }}>
+                      onClick={() => { if (it.cv) { setSelected(null); setEvidence(it.cv) } }}
+                      className={`rounded-lg bg-white/[0.04] p-2 border-l-2 ${it.cv ? 'cursor-pointer hover:bg-white/[0.08]' : ''}`} style={{ borderColor: s.c }}>
                       <div className="flex items-center justify-between">
                         <span className="chip" style={{ background: `${s.c}1f`, color: s.c }}>{s.icon}{s.label}</span>
                         <span className="text-[8.5px] text-white/40 font-mono">{clock(it.ts)}</span>
@@ -44,6 +48,7 @@ export function AIOpsCenter() {
                       <div className="mt-1 text-[11px] font-semibold text-white/90 leading-snug">{it.msg}</div>
                       <div className="mt-0.5 text-[9.5px] text-white/50">{it.asset}</div>
                       <div className="mt-1 flex items-start gap-1 rounded bg-white/[0.04] px-1.5 py-1"><span className="text-info text-[9px]">⤷</span><span className="text-[9.5px] text-white/70 leading-snug">{it.action}</span></div>
+                      {it.cv && <div className="mt-1 text-[9px] font-semibold text-info flex items-center gap-1">📷 View AI Vision evidence ›</div>}
                     </motion.div>
                   )
                 })}

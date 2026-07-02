@@ -8,6 +8,8 @@ export const useUI = create((set) => ({
   controlOpen: false,
   dock: null,              // null | 'alerts' | 'ai' | 'reports' | 'history' | 'maintenance' | 'settings'
   simSpeed: 1,
+  evidence: null,          // conveyor id whose AI Vision Evidence panel is open
+  focus: null,             // conveyor id to fly the camera toward (double-click)
 
   toggleKpi: () => set(s => ({ kpiOpen: !s.kpiOpen })),
   toggleAi: () => set(s => ({ aiOpen: !s.aiOpen })),
@@ -15,4 +17,6 @@ export const useUI = create((set) => ({
   setControlOpen: (v) => set({ controlOpen: v }),
   setDock: (d) => set(s => ({ dock: s.dock === d ? null : d })),
   setSimSpeed: (v) => set({ simSpeed: v }),
+  setEvidence: (id) => set({ evidence: id }),
+  setFocus: (id) => set({ focus: id }),
 }))
